@@ -1,0 +1,19 @@
+# build output
+dist/
+build/
+*.spec
+__pycache__/
+*.pyc
+
+# large / third-party binaries (shipped in the release ZIP, not the repo)
+ffmpeg.exe
+ffprobe.exe
+*.zip
+
+# recordings & local files
+*.mp4
+*.mkv
+*.mka
+.quickrec_tmp/
+.vscode/
+.idea/
