@@ -1,12 +1,12 @@
 ﻿"""
-QuickRec - a tiny, fast screen recorder for Windows 11.
+SmoothRec - a tiny, fast screen recorder for Windows 11.
 
 Capture:  Desktop Duplication API (ddagrab) -> GPU scaling -> hardware encoder
           (Intel QSV / NVIDIA NVENC / AMD AMF), with automatic CPU fallback.
 Needs:    Python 3.10+, FFmpeg (with ddagrab), optional `pip install soundcard`
           for system-audio capture.
 
-Run:      double-click QuickRec.pyw   (or: pythonw QuickRec.pyw)
+Run:      double-click SmoothRec.pyw   (or: pythonw SmoothRec.pyw)
 """
 import collections
 import ctypes
@@ -40,7 +40,7 @@ from tkinter import ttk, filedialog, messagebox
 
 warnings.filterwarnings("ignore")  # soundcard emits harmless "data discontinuity" warnings
 
-APP = "QuickRec"
+APP = "SmoothRec"
 APP_VERSION = "1.0.0"
 APP_AUTHOR = "Anant Rastogi"
 CFG_DIR = os.path.join(os.environ.get("APPDATA", os.path.expanduser("~")), APP)
@@ -225,13 +225,46 @@ DEFAULTS = {
 }
 
 
+_OLD_NAME = "Quick" + "Rec"  # the app's former name: only used to migrate old settings/recordings once
+
+
+def _move_dir(old, new):
+    """Rename a folder; if Windows refuses, move its contents item by item instead."""
+    if not os.path.isdir(old) or (os.path.exists(new) and os.listdir(new)):
+        return
+    try:
+        if os.path.isdir(new):
+            os.rmdir(new)
+        os.replace(old, new)
+        return
+    except OSError:
+        pass
+    try:
+        os.makedirs(new, exist_ok=True)
+        for name in os.listdir(old):
+            shutil.move(os.path.join(old, name), os.path.join(new, name))
+        os.rmdir(old)
+    except OSError:
+        pass
+
+
+def _migrate_old_name():
+    """Move %APPDATA%\\<old name> and Videos\\<old name> to the SmoothRec locations (one time)."""
+    _move_dir(os.path.join(os.path.dirname(CFG_DIR), _OLD_NAME), CFG_DIR)
+    _move_dir(os.path.join(os.path.dirname(videos_dir()), _OLD_NAME), videos_dir())
+
+
 def load_cfg():
+    _migrate_old_name()
     cfg = dict(DEFAULTS)
     try:
         with open(CFG_PATH, encoding="utf-8-sig") as f:  # tolerate a BOM (e.g. edited in Notepad)
             cfg.update(json.load(f))
     except Exception:
         pass
+    if os.path.normcase(os.path.normpath(cfg.get("out_dir", ""))) == os.path.normcase(
+            os.path.join(os.path.dirname(videos_dir()), _OLD_NAME)):
+        cfg["out_dir"] = videos_dir()  # the old default recordings folder now has the new name
     return cfg
 
 
@@ -696,7 +729,7 @@ class Recorder:
         self.cfg, self.geo, self.plans = dict(cfg), geometry, list(plans)
         self.segments, self.current = [], None
         self.stamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        self.tmpdir = os.path.join(cfg["out_dir"], ".quickrec_tmp")
+        self.tmpdir = os.path.join(cfg["out_dir"], ".smoothrec_tmp")
         os.makedirs(self.tmpdir, exist_ok=True)
         return self.new_segment()
 
@@ -1003,7 +1036,7 @@ class Recorder:
         if not parts:
             return None, "Nothing was recorded."
         cont = self.cfg["container"]
-        out = os.path.join(self.cfg["out_dir"], f"QuickRec_{self.stamp}.{cont}")
+        out = os.path.join(self.cfg["out_dir"], f"SmoothRec_{self.stamp}.{cont}")
         if cont == "mkv" and len(parts) == 1:
             os.replace(parts[0], out)
             self._cleanup_tmp()
@@ -1280,7 +1313,7 @@ class App:
         self.cfg = load_cfg()
         self.root = tk.Tk()
         self.root.withdraw()
-        ico = os.path.join(getattr(sys, "_MEIPASS", os.path.dirname(os.path.abspath(__file__))), "QuickRec.ico")
+        ico = os.path.join(getattr(sys, "_MEIPASS", os.path.dirname(os.path.abspath(__file__))), "SmoothRec.ico")
         if os.path.exists(ico):
             try:
                 self.root.iconbitmap(default=ico)
@@ -1305,7 +1338,7 @@ class App:
         self.ffmpeg = find_ffmpeg(self.cfg)
         if not self.ffmpeg:
             messagebox.showerror(APP, "FFmpeg was not found.\n\nInstall it with:\n    winget install Gyan.FFmpeg\n"
-                                      "or put ffmpeg.exe next to QuickRec.pyw, then start QuickRec again.")
+                                      "or put ffmpeg.exe next to SmoothRec.pyw, then start SmoothRec again.")
             sys.exit(1)
         self.rec = Recorder(self.ffmpeg)
         self.heartbeat = None
@@ -1811,7 +1844,7 @@ class App:
             self.notify("Select a region first")
             return
         os.makedirs(self.cfg["out_dir"], exist_ok=True)
-        path = os.path.join(self.cfg["out_dir"], f"QuickRec_{datetime.now():%Y-%m-%d_%H-%M-%S}.png")
+        path = os.path.join(self.cfg["out_dir"], f"SmoothRec_{datetime.now():%Y-%m-%d_%H-%M-%S}.png")
         temp_hb = self.heartbeat is None
         self._start_heartbeat(geo)
         wgc = self.avail is None or self.avail.get("_wgc", True)
@@ -2388,7 +2421,7 @@ class SettingsWindow:
         self.app, self.S = app, app.S
         S = self.S
         t = self.top = tk.Toplevel(app.root)
-        t.title("QuickRec settings")
+        t.title("SmoothRec settings")
         t.configure(bg=UI_WIN)
         t.resizable(False, False)
         t.protocol("WM_DELETE_WINDOW", self.close)
@@ -2425,7 +2458,7 @@ class SettingsWindow:
 
         def paint(d, u):
             d.ellipse([u(22), u(26), u(34), u(38)], fill=UI_ACC)
-            d.text((u(44), u(32)), "QuickRec", font=pil_font("semi", u(_pt(13))), fill=UI_TXT, anchor="lm")
+            d.text((u(44), u(32)), "SmoothRec", font=pil_font("semi", u(_pt(13))), fill=UI_TXT, anchor="lm")
             for i, (key, glyph, label) in enumerate(self.NAV):
                 y = 74 + i * 44
                 if key == self.page or key == self.side_hover:
@@ -2749,7 +2782,7 @@ class SettingsWindow:
                 {"label": "Stop automatically after", "desc": "Minutes · 0 = never",
                  "make": self.num_field("auto_stop", 0, 1440, 90, as_float=True)},
                 {"label": "Border around recorded area", "make": self.tg("border")},
-                {"label": "Hide QuickRec from recordings", "desc": "Bar, countdown and border never appear in videos",
+                {"label": "Hide SmoothRec from recordings", "desc": "Bar, countdown and border never appear in videos",
                  "make": self.tg("exclude_ui")},
             ]),
         ]
@@ -2796,7 +2829,7 @@ class SettingsWindow:
         self.top.destroy()
 
 
-# ---- headless self-test: pythonw QuickRec.pyw --selftest [seconds] ----------------
+# ---- headless self-test: pythonw SmoothRec.pyw --selftest [seconds] ----------------
 def selftest(secs=4):
     cfg = load_cfg()
     ff = find_ffmpeg(cfg)

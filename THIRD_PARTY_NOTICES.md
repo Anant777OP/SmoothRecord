@@ -1,11 +1,11 @@
 # Third-party notices
 
-QuickRec's own code is © 2026 Anant Rastogi and MIT-licensed (see `LICENSE`). The release download bundles or embeds the following:
+SmoothRec's own code is © 2026 Anant Rastogi and MIT-licensed (see `LICENSE`). The release download bundles or embeds the following:
 
 | Component | Use | License |
 |---|---|---|
 | **FFmpeg** (`ffmpeg.exe`) | Capture, scaling, encoding | GPL v3 (this build includes GPL components) |
-| Python | Runtime embedded in `QuickRec.exe` | PSF License |
+| Python | Runtime embedded in `SmoothRec.exe` | PSF License |
 | Tcl/Tk | User interface | Tcl/Tk License (BSD-style) |
 | NumPy | Audio buffers | BSD 3-Clause |
 | SoundCard | WASAPI audio capture | BSD 3-Clause |
@@ -14,7 +14,7 @@ QuickRec's own code is © 2026 Anant Rastogi and MIT-licensed (see `LICENSE`). T
 
 ## FFmpeg
 
-`ffmpeg.exe` is a separate program that QuickRec runs as an external process; it isn't linked into QuickRec.
+`ffmpeg.exe` is a separate program that SmoothRec runs as an external process; it isn't linked into SmoothRec.
 The bundled binary is an unmodified FFmpeg build (`N-127043-g5a54fcf75e`, from the
 [yt-dlp FFmpeg-Builds](https://github.com/yt-dlp/FFmpeg-Builds) project, distributed through `winget`).
 
