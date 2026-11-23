@@ -14,6 +14,6 @@ ffprobe.exe
 *.mp4
 *.mkv
 *.mka
-.smoothrec_tmp/
+.smoothrecord_tmp/
 .vscode/
 .idea/

@@ -1,9 +1,9 @@
-# SmoothRec v1.0.0
+# SmoothRecord v1.0.0
 
-The first release of SmoothRec, a tiny, fast screen recorder for Windows 11, made by **Anant Rastogi**.
+The first release of SmoothRecord, a tiny, fast screen recorder for Windows 11, made by **Anant Rastogi**.
 
 ## Download
-**SmoothRec-v1.0.0-win64.zip**: unzip it, keep `SmoothRec.exe` and `ffmpeg.exe` together, and run `SmoothRec.exe`. No installation is needed.
+**SmoothRecord-v1.0.0-win64.zip**: unzip it, keep `SmoothRecord.exe` and `ffmpeg.exe` together, and run `SmoothRecord.exe`. No installation is needed.
 
 ## Highlights
 - **One floating bar:** record, pause, screenshot, settings. A right-click menu holds the quick options.
